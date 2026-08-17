@@ -1,0 +1,54 @@
+# Xcode
+build/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcworkspace
+!default.xcworkspace/
+xcuserdata/
+DerivedData/
+*.xcarchive
+*.dSYM
+*.swiftpm
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# Carthage
+Carthage/
+Cartfile.resolved
+
+# SPM
+.swiftpm/
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+.AppleDouble
+.LSOverride
+*.swp
+*~
+.idea/
+
+# IDE
+.vscode/
+*.swiftformat
+
+# Build artifacts
+*.o
+*.a
+*.so
+*.dylib
+
+# Playground
+*.playground
+
+# Fastlane
+fastlane/report.xml
+fastlane/preview.html
+fastlane/test_output
