@@ -37,6 +37,7 @@ Cartfile.resolved
 
 # IDE
 .vscode/
+.claude/
 *.swiftformat
 
 # Build artifacts
