@@ -15,7 +15,7 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # Pick whatever iPhone simulator the runner image ships rather than
       # pinning a model, which breaks every time the image is updated.
