@@ -5,6 +5,7 @@ struct MyItems: View {
     @Query(sort: \StockItem.createdAt, order: .reverse) private var items: [StockItem]
     @Environment(\.modelContext) private var modelContext
     @State private var selectedItem: StockItem? = nil
+    @State private var isAddingItem = false
     
     var body: some View {
         ZStack {
@@ -12,10 +13,8 @@ struct MyItems: View {
             Color(.backgroundPrimary).ignoresSafeArea()
             
             if items.isEmpty {
-                VStack {
-                    EmptyStateView(type: .item) { }
-                        .padding(.horizontal)
-                }
+                EmptyStateView(type: .item) { isAddingItem = true }
+                    .padding(.horizontal)
             } else {
                 List {
                     ForEach(items) { item in
@@ -46,6 +45,7 @@ struct MyItems: View {
         .navigationDestination(item: $selectedItem) { item in
             Item(item: item)
         }
+        .navigationDestination(isPresented: $isAddingItem) { Item() }
         
         .toolbar {
             

@@ -21,6 +21,8 @@ InShelf helps users keep an accurate record of food items at home. It categorize
   - Switch item states between "To buy" and "In Stock".
   - Add notes and expiration dates with localized date pickers.
   - Delete items with swipe-to-delete.
+- **Shopping List**: Items marked "To buy" in one place, with inline quantity controls and a swipe to move them into stock once purchased.
+- **Search and Filter**: Search stock by name (case- and accent-insensitive) and filter by expiry status.
 - **Creations Hub**: Quick access to manage items, recipes, and featured suggestions.
 - **Local Persistence**: Built with SwiftData for fast, offline-first data storage on the device.
 
@@ -51,6 +53,7 @@ InShelf/
 │   ├── ItemBarType.swift           # Enum for item bar visual variants
 │   ├── ItemIcon.swift              # Food icon mappings (SVG image assets)
 │   ├── ItemPurchaseState.swift     # To buy / in stock
+│   ├── StockFilter.swift           # Search and expiry filtering over item collections
 │   ├── StockItem.swift             # SwiftData model for inventory items
 │   └── StockItem+Derived.swift     # Computed state and expiry accessors
 └── Screens/
@@ -58,7 +61,8 @@ InShelf/
     ├── Create.swift            # Creations hub screen
     ├── Item.swift              # Item creation and edit form
     ├── MyItems.swift           # Full list of user items
-    └── Stock.swift             # Main stock inventory with expiration sorting
+    ├── ShoppingList.swift      # Items still to buy
+    └── Stock.swift             # Main stock inventory with search, filter, and sorting
 
 InShelfTests/                   # Swift Testing suites
 docs/                           # Architecture, roadmap, conventions

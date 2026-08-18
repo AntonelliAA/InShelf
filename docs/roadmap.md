@@ -51,19 +51,19 @@ xcodebuild test -scheme InShelf -destination 'platform=iOS Simulator,name=iPhone
 
 ---
 
-## Phase 2 — Close the loop
+## Phase 2 — Close the loop ✅ Done 2026-08-18
 
-The core user journey — *notice you are out of something → put it on a list → buy it → it goes back in stock* — is half built. The model already supports all of it.
+The core journey — *notice you are out of something → put it on a list → buy it → it goes back in stock* — now runs end to end.
 
-- **Shopping List tab.** The `List` tab exists and shows "Coming Soon". `stateRaw == "toBuy"` already partitions the data, `alwaysInList` already exists to auto-restock staples, and `ItemBarType.addRemove` is already written and rendered only in previews. This is the highest value-per-line feature in the repo: mostly wiring, not building.
-- **Check off → move to stock.** Tapping an item complete flips `stateRaw` to `inStock`. This is the single interaction that makes the two tabs one product instead of two lists.
-- **Search and filter in Stock.** `Stock.swift:106-119` already renders a magnifying glass and a filter button with empty action closures. Wire `.searchable` and a filter by status (expiring / expired / all) — the latter falls out of Phase 1's `ExpiryStatus` for free.
-- **Inline quantity adjustment.** Adjusting a count should not require opening the full editor. `.addRemove` is built for exactly this.
-- **Empty state CTAs** (#10) — the copy already promises a button; render it.
+- ~~**Shopping List tab**~~ — `Screens/ShoppingList.swift`, replacing the placeholder. Shows `state == .toBuy`, searchable, with swipe-to-delete.
+- ~~**Check off → move to stock**~~ — a leading swipe action flips `state` to `.inStock`. This is the single interaction that makes the two tabs one product instead of two lists.
+- ~~**Search and filter in Stock**~~ — `.searchable` plus a filter menu over `ExpiryStatus`. The toolbar buttons that shipped with empty closures are now the real thing; the magnifying glass was dropped because `.searchable` provides it. The expired banner is tappable and jumps straight to the expired filter.
+- ~~**Inline quantity adjustment**~~ — `ItemBarType.addRemove` finally has callers. `ItemBar` takes optional increment and decrement closures, so the component stays previewable without a model.
+- ~~**Empty state CTAs** (#10)~~ — `EmptyStateView` renders the button its copy always promised, and all three screens wire it to the item editor.
 
-**Why third:** this is the smallest amount of work that turns InShelf from an inventory viewer into something used weekly.
+**Still open:** `alwaysInList` remains unread by any code — see #17. It is a product question, not an implementation gap.
 
-Effort: medium. Almost entirely composition of parts that already exist.
+Effort: medium, and mostly composition — `stateRaw`, `alwaysInList`, and `.addRemove` were all already in the model.
 
 ---
 

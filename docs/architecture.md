@@ -11,7 +11,7 @@ InShelfApp (@main)
   └─ .modelContainer(for: [StockItem.self])   ← the only persistence setup
        └─ TabBar (TabView, 5 tabs)
             ├─ Recipes  → ComingSoon
-            ├─ List     → ComingSoon
+            ├─ List     → ShoppingList ── ItemBar (.addRemove rows)
             ├─ Create   → Create ─┬─ FeaturedCardView
             │                     └─ MenuCardView → MyItems ─┬─ ItemBar (rows)
             │                                                └─ Item (create / edit form)
@@ -19,7 +19,7 @@ InShelfApp (@main)
             └─ Profile  → ComingSoon
 ```
 
-Three of five tabs are placeholders. `Create` is the only path that reaches the editor, and `Item` is the only writer in the app.
+Two of five tabs are still placeholders. `Item` remains the only full editor, but `ShoppingList` now writes quantity and purchase state directly.
 
 ## Data flow
 

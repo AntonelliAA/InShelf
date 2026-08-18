@@ -24,11 +24,18 @@ struct EmptyStateView: View {
                 }
                 
             }
-            
+
+            Button(type.actionTitle, action: action)
+                .buttonStyle(.borderedProminent)
+                .tint(Color(.redPrimary))
         }
     }
 }
 
 #Preview {
-    EmptyStateView(type: .stock, action: {})
+    EmptyStateView(type: .shoppingList, action: {})
+}
+
+#Preview("Light") {
+    EmptyStateView(type: .stock, action: {}).preferredColorScheme(.light)
 }

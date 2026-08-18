@@ -11,6 +11,9 @@ struct ItemBar: View {
     var icon: ItemIcon
     var type: ItemBarType
     var expiry: ExpiryStatus = .none
+    /// Only meaningful for `.addRemove`. Absent closures render the controls inert.
+    var onDecrement: (() -> Void)?
+    var onIncrement: (() -> Void)?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -44,11 +47,18 @@ struct ItemBar: View {
                 case .addRemove(let name, let quantity):
                     Text(name).font(.headline)
                     Spacer()
-                    HStack {
-                        Image(systemName: "minus").foregroundStyle(.redSecondary)
-                        Text("\(quantity)")
-                        Image(systemName: "plus").foregroundStyle(.greenPrimary)
+                    HStack(spacing: 16) {
+                        Button { onDecrement?() } label: {
+                            Image(systemName: "minus").foregroundStyle(.redSecondary)
+                        }
+                        .disabled(quantity == 0)
+                        Text("\(quantity)").frame(minWidth: 24)
+                        Button { onIncrement?() } label: {
+                            Image(systemName: "plus").foregroundStyle(.greenPrimary)
+                        }
                     }
+                    // Without this the row's own tap target swallows both buttons.
+                    .buttonStyle(.borderless)
 
                 case .simple(let name):
                     Text(name).font(.headline)
