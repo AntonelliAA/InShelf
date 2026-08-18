@@ -7,11 +7,6 @@
 
 import SwiftUI
 
-enum ItemPurchaseState {
-    case toBuy
-    case inStock
-}
-
 enum UnitType: String, CaseIterable {
     case units
     case kg
@@ -35,7 +30,6 @@ struct Item: View {
     @State private var recipesCount = 0
     @State private var quantity = 0
     @State private var description = ""
-    @State private var misc = ""
     @State private var purchaseState: ItemPurchaseState = .toBuy
     @State private var title: String = ""
     @State private var selectedIcon: ItemIcon = .avocado
@@ -93,7 +87,7 @@ struct Item: View {
                                 Text("To buy")
                             }
                             .font(.title2)
-                            .frame(minWidth: 171,minHeight: 80)
+                            .frame(maxWidth: .infinity, minHeight: 80)
                             .background(.backgroundSecondary)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                             .overlay(
@@ -115,7 +109,7 @@ struct Item: View {
                                 Text("In Stock")
                             }
                             .font(.title2)
-                            .frame(minWidth: 171,minHeight: 80)
+                            .frame(maxWidth: .infinity, minHeight: 80)
                             .background(.backgroundSecondary)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                             .overlay(
@@ -172,7 +166,7 @@ struct Item: View {
                             }
                         }
                         .padding(.horizontal, 12.0)
-                        .frame(minWidth: 361,minHeight: 52)
+                        .frame(maxWidth: .infinity, minHeight: 52)
                         .background(
                             RoundedRectangle(cornerRadius:16)
                                 .foregroundStyle(.backgroundSecondary)
@@ -191,7 +185,7 @@ struct Item: View {
                                 .disableAutocorrection(false)
                         }
                         .padding(.horizontal, 12.0)
-                        .frame(minWidth: 361,minHeight: 52,alignment: .leading)
+                        .frame(maxWidth: .infinity, minHeight: 52, alignment: .leading)
                         .background(
                             RoundedRectangle(cornerRadius:16)
                                 .foregroundStyle(.backgroundSecondary)
@@ -224,7 +218,7 @@ struct Item: View {
                                 .tint(Color(.redSecondary))
                         }
                         .padding(.horizontal, 12.0)
-                        .frame(minWidth: 361,minHeight: 52)
+                        .frame(maxWidth: .infinity, minHeight: 52)
                         .background(
                             RoundedRectangle(cornerRadius:16)
                                 .foregroundStyle(.backgroundSecondary)
@@ -241,7 +235,7 @@ struct Item: View {
                                 .tint(Color(.redSecondary))
                         }
                         .padding(.horizontal, 12.0)
-                        .frame(minWidth: 361,minHeight: 52)
+                        .frame(maxWidth: .infinity, minHeight: 52)
                         .background(
                             RoundedRectangle(cornerRadius:16)
                                 .foregroundStyle(.backgroundSecondary)
@@ -257,7 +251,7 @@ struct Item: View {
                                 .foregroundStyle(.labelSecondary)
                         }
                         .padding(.horizontal, 12.0)
-                        .frame(minWidth: 361,minHeight: 52)
+                        .frame(maxWidth: .infinity, minHeight: 52)
                         .background(
                             RoundedRectangle(cornerRadius:16)
                                 .foregroundStyle(.backgroundSecondary)
@@ -280,7 +274,7 @@ struct Item: View {
             expirationDate = existing.expirationDate ?? Date()
             alwaysInList = existing.alwaysInList
             recipesCount = existing.recipesCount
-            purchaseState = existing.stateRaw == "inStock" ? .inStock : .toBuy
+            purchaseState = existing.state
         }
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
@@ -304,11 +298,10 @@ struct Item: View {
                         existing.expirationDate = hasExpiration ? expirationDate : nil
                         existing.alwaysInList = alwaysInList
                         existing.recipesCount = recipesCount
-                        existing.stateRaw = (purchaseState == .toBuy) ? "toBuy" : "inStock"
+                        existing.state = purchaseState
                         existing.updatedAt = Date()
                         dismiss()
                     } else {
-                        let stateRaw = (purchaseState == .toBuy) ? "toBuy" : "inStock"
                         let newItem = StockItem(
                             name: trimmed,
                             iconRaw: selectedIcon.rawValue,
@@ -318,7 +311,7 @@ struct Item: View {
                             expirationDate: hasExpiration ? expirationDate : nil,
                             alwaysInList: alwaysInList,
                             recipesCount: recipesCount,
-                            stateRaw: stateRaw
+                            stateRaw: purchaseState.rawValue
                         )
                         modelContext.insert(newItem)
                         dismiss()

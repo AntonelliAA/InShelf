@@ -4,6 +4,8 @@ struct FeaturedCardView: View {
     var body: some View {
         VStack(spacing: 0) {
             Image("featured_background")
+                .resizable()
+                .scaledToFit()
             VStack(alignment: .leading) {
                 Text("Search new Recipes")
                     .font(.headline)
@@ -16,7 +18,7 @@ struct FeaturedCardView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(.backgroundSecondary)
         }
-        .frame(width: 361)
+        .frame(maxWidth: .infinity)
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }

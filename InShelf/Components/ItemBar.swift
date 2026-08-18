@@ -10,8 +10,8 @@ import SwiftUI
 struct ItemBar: View {
     var icon: ItemIcon
     var type: ItemBarType
-    var expiryColor: Color? = nil
-    
+    var expiry: ExpiryStatus = .none
+
     var body: some View {
         VStack(spacing: 0) {
             HStack {
@@ -32,7 +32,7 @@ struct ItemBar: View {
                             .font(.headline)
                         Text(expiry)
                             .font(.subheadline)
-                            .foregroundStyle(expiryColor ?? .redSecondary)
+                            .foregroundStyle(self.expiry.color)
                         
                     }
                     
@@ -56,7 +56,7 @@ struct ItemBar: View {
                 }
             }
             .padding(.horizontal, 16)
-            .frame(width: 361, height: 72)
+            .frame(maxWidth: .infinity, minHeight: 72)
             .background(.backgroundSecondary)
             .foregroundColor(.labelPrimary)
             .clipShape(
@@ -69,8 +69,8 @@ struct ItemBar: View {
             )
             
             if case .warning(_, _, _, _, let expiredCount) = type {
-                Text("\(expiredCount) expired items")
-                    .frame(maxWidth: 361, maxHeight: 21)
+                Text("^[\(expiredCount) item](inflect: true) expired")
+                    .frame(maxWidth: .infinity, minHeight: 21)
                     .background(.redSecondary)
                     .foregroundColor(.labelPrimary)
                     .clipShape(
@@ -86,13 +86,36 @@ struct ItemBar: View {
     }
 }
 
-#Preview {
-    VStack(spacing: 16) {
-        ItemBar(icon: .bento, type: .normal(name: "Item", location: "Location", quantity: 3, expiry: "Expiry"))
-        ItemBar(icon: .bento, type: .warning(name: "Item", location: "Location", quantity: 3, expiry: "Expiry", expiredCount: 2))
-        ItemBar(icon: .bento, type: .addOnly(name: "Item"))
-        ItemBar(icon: .bento, type: .addRemove(name: "Item", quantity: 1))
-        ItemBar(icon: .bento, type: .simple(name: "Item"))
+extension ExpiryStatus {
+    var color: Color {
+        switch self {
+        case .none, .valid: return .greenPrimary
+        case .expiringSoon: return Color(.orangePrimary)
+        case .expired: return .redSecondary
+        }
     }
-        .preferredColorScheme(.dark)
+}
+
+#Preview {
+    ItemBarGallery().preferredColorScheme(.dark)
+}
+
+#Preview("Light") {
+    ItemBarGallery().preferredColorScheme(.light)
+}
+
+private struct ItemBarGallery: View {
+    var body: some View {
+        VStack(spacing: 16) {
+            ItemBar(icon: .bento, type: .normal(name: "Item", location: "Location", quantity: 3, expiry: "Aug 21"), expiry: .expiringSoon)
+            ItemBar(icon: .bento, type: .normal(name: "Item", location: "Location", quantity: 3, expiry: "Sep 30"), expiry: .valid)
+            ItemBar(icon: .bento, type: .warning(name: "Item", location: "Location", quantity: 3, expiry: "Expired", expiredCount: 1), expiry: .expired)
+            ItemBar(icon: .bento, type: .addOnly(name: "Item"))
+            ItemBar(icon: .bento, type: .addRemove(name: "Item", quantity: 1))
+            ItemBar(icon: .bento, type: .simple(name: "Item"))
+        }
+        .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(.backgroundPrimary))
+    }
 }

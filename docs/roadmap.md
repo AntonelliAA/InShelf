@@ -29,20 +29,25 @@ Effort: small. All were localized edits, no architecture involved.
 
 ---
 
-## Phase 1 — Make it cheap to change
+## Phase 1 — Make it cheap to change ✅ Done 2026-08-18
 
 Still nothing new. This phase exists because every feature after it touches the same three seams.
 
-- **Extract `ExpiryStatus`** (#9) — one enum on `StockItem` returning status, color, and label. Every later feature reads expiry: notifications, widgets, filters, sorting, stats. Duplicating that logic a third time is where the bugs start.
-- **Type `stateRaw` as an enum** (#7) — the shopping list, stock filter, and quick-add all branch on this string.
-- **Responsive layout** (#6) — replace the hardcoded 361/176.5/171 widths. Do it while there are four components, not fourteen.
-- **Add a test target** — there is none. Seed it with `ExpiryStatus` boundary cases (expired / 3 days / 4 days / nil), which is the logic most likely to break silently.
-- **Schema versioning** (#15) — `VersionedSchema` + a migration plan, before the first build reaches a device you do not own.
-- Delete `TaskCategory` and the unused `@State` vars (#14).
+- ~~**Extract `ExpiryStatus`** (#9)~~ — `Models/ExpiryStatus.swift`, Foundation-only and clock-injectable. The two copies of `expiryColor(for:)` are gone; `ItemBar` now takes a status and maps the color itself.
+- ~~**Type the purchase state** (#7)~~ — `ItemPurchaseState` is `String`-backed with a `StockItem.state` accessor. `stateRaw` stays the stored column but nothing outside `StockItem+Derived.swift` touches it, so no schema change and no migration.
+- ~~**Responsive layout** (#6)~~ — every hardcoded 361 / 176.5 / 171 replaced with `maxWidth: .infinity`; card images are resizable and scale to their container.
+- ~~Delete `TaskCategory` and unused `@State` vars (#14)~~
+- ~~Pluralize the expired banner (#12)~~ — done in passing
+- **Test coverage** — partial. `Scripts/check-expiry-status.swift` compiles the real `ExpiryStatus` and asserts nine boundary cases against a fixed clock. It is not an Xcode test target (#16) — that needs `project.pbxproj` surgery best done in Xcode.
+- **Schema versioning (#15)** — deliberately skipped. No users, no store worth migrating.
 
-**Why second:** this is the only phase with no user-visible output, which makes it the easiest to skip and the most expensive to skip. Doing it after Phase 2 means retrofitting a shopping list that already shipped on magic strings.
+**Why second:** this is the only phase with no user-visible output, which makes it the easiest to skip and the most expensive to skip. Doing it after Phase 2 would mean retrofitting a shopping list that already shipped on magic strings.
 
-Effort: medium. The test target and schema versioning are one-time setup you never repeat.
+Run the check with:
+
+```bash
+swiftc InShelf/Models/ExpiryStatus.swift Scripts/check-expiry-status.swift -o /tmp/check && /tmp/check
+```
 
 ---
 

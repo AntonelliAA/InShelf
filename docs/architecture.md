@@ -42,27 +42,32 @@ The `Item` screen intentionally edits a *copy* in `@State` so an abandoned edit 
 | `quantity` | `Int` | Floor-clamped at 0 in the editor |
 | `unitRaw` | `String` | Raw value of `UnitType` (`units` / `kg` / `g`) |
 | `notes` | `String` | Labelled "Description" in the UI |
-| `expirationDate` | `Date?` | Optional in the model, but the editor never writes `nil` — see known issues |
+| `expirationDate` | `Date?` | `nil` when the editor's expiration toggle is off |
 | `alwaysInList` | `Bool` | Reserved for the shopping list; nothing reads it yet |
 | `recipesCount` | `Int` | Reserved for recipes; display-only, never incremented |
-| `stateRaw` | `String` | `"toBuy"` or `"inStock"` — untyped, compared as literals in 3 files |
+| `stateRaw` | `String` | Backing column for `ItemPurchaseState`; read it through `StockItem.state`, never directly |
 | `createdAt` / `updatedAt` | `Date` | `updatedAt` is only touched on edit, not on insert |
 
 No schema versioning or `VersionedSchema` is configured. Any change to `StockItem` that is not purely additive will fail to open existing stores on device.
 
 ## Derived state
 
-Expiry classification is the app's core logic and currently lives in two places.
+Expiry classification is the app's core logic and lives in exactly one place: `Models/ExpiryStatus.swift`.
 
 ```
-expired      target < today
-expiring     0 ≤ (target − today) ≤ 3 days   → .orangePrimary
-valid        otherwise, or no date            → .greenPrimary
+expired       target < today
+expiringSoon  0 ≤ (target − today) ≤ 3 days
+valid         further out
+none          no expiration date
 ```
 
-`Stock` additionally partitions items: expired ones collapse into a single `.warning` summary row, the rest sort ascending by expiration date with undated items last. `MyItems` does no partitioning and shows everything.
+`ExpiryStatus.status(for:asOf:calendar:)` normalizes both sides to `startOfDay`, so an item expiring later today is not already expired. It takes the clock and calendar as parameters rather than reading `Date()` internally — that is what makes it assertable without mocking, and `Scripts/check-expiry-status.swift` compiles this exact file to check nine boundary cases.
 
-`expiryColor(for:)` is duplicated verbatim in `Stock.swift` and `MyItems.swift`. Extracting it (as an `ExpiryStatus` enum on `StockItem`) is Phase 1 work — it is the seam every future feature touches.
+The file is deliberately Foundation-only. Color mapping lives in an `ExpiryStatus` extension inside `Components/ItemBar.swift`, next to the view that renders it, which keeps the classification free of SwiftUI and free of the asset catalog.
+
+`StockItem.expiryStatus(asOf:)` and `StockItem.state` live in `Models/StockItem+Derived.swift`. Computed properties on a `@Model` type go in an extension so the macro does not try to persist them. `state` reads and writes the stored `stateRaw` column through `ItemPurchaseState`, so the string literals exist in one file instead of five — without changing the schema.
+
+`Stock` partitions on top of this: expired items collapse into a single `.warning` summary row, the rest sort ascending by expiration date with undated items last. `MyItems` does no partitioning and shows everything.
 
 ## Design system
 

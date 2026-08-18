@@ -20,7 +20,14 @@ xcodebuild -scheme InShelf -destination 'generic/platform=iOS Simulator' build
 open InShelf.xcodeproj
 ```
 
-There is **no test target yet**. Do not claim tests pass. If you add logic worth testing, create the target first (see [docs/roadmap.md](docs/roadmap.md), Phase 1).
+```bash
+# Check the expiry classification (compiles the real source, asserts, exits non-zero on failure)
+swiftc InShelf/Models/ExpiryStatus.swift Scripts/check-expiry-status.swift -o /tmp/check && /tmp/check
+```
+
+`Scripts/` must stay outside `InShelf/` — that folder is file-system-synchronized, so any `.swift` inside it is compiled into the app.
+
+There is **no Xcode test target yet**, only the script above. Do not claim tests pass. If you add logic worth testing, create the target first (see [docs/roadmap.md](docs/roadmap.md), Phase 1).
 
 ## Layout
 
@@ -37,9 +44,9 @@ Full data flow and design tokens: [docs/architecture.md](docs/architecture.md).
 
 - **Colors come from the asset catalog, never literals.** Use `.labelPrimary`, `.backgroundSecondary`, `.redPrimary`, etc. via the generated `ShapeStyle` accessors — not `.white`, `.gray`, or `Color("RedSecondary")` string lookups.
 - **Both color schemes must work.** The app does not force dark mode; `#Preview` blocks using `.preferredColorScheme(.dark)` hide light-mode bugs. Preview both.
-- **Enums over magic strings.** `ItemIcon` and `UnitType` are `String`-backed enums; follow that pattern. `StockItem.stateRaw` is a known violation being tracked in [docs/known-issues.md](docs/known-issues.md).
-- **No fixed widths.** Existing code hardcodes `361` / `176.5` / `171`; this is a bug, not a pattern. New views use `.frame(maxWidth: .infinity)` + padding.
-- **Date logic normalizes to `Calendar.current.startOfDay(for:)`** before comparing. Never compare raw `Date` values for expiry.
+- **Enums over magic strings.** `ItemIcon`, `UnitType`, and `ItemPurchaseState` are `String`-backed enums; follow that pattern. Read purchase state through `StockItem.state`, never `stateRaw`.
+- **No fixed widths.** Use `.frame(maxWidth: .infinity)` + padding. Card images are `.resizable().scaledToFit()` so they follow their container.
+- **Expiry logic belongs in `ExpiryStatus`.** Do not compare dates for expiry anywhere else, and keep that file free of SwiftUI and SwiftData so its check stays runnable.
 - **Never hardcode a locale.** `Item.swift` pins the DatePicker to `pt_BR`; that is a bug. Use the device locale.
 - SwiftData writes go through `@Environment(\.modelContext)`. Reads go through `@Query`. There is no repository layer and none is wanted at this size.
 

@@ -8,6 +8,8 @@ struct MenuCardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0.0) {
             Image(imageName)
+                .resizable()
+                .scaledToFit()
             HStack(alignment: .center, spacing: 4) {
                 VStack(alignment: .leading) {
                     Text(title)
@@ -40,7 +42,7 @@ struct MenuCardView: View {
                 )
             )
         }
-        .frame(width: 176.5)
+        .frame(maxWidth: .infinity)
     }
 }
 
