@@ -6,7 +6,7 @@ Numbers are stable IDs — when an issue is fixed its entry is deleted, and the 
 
 **Fixed 2026-08-18 (Phase 0):** #1 Light Mode, #2 always-expiring items, #3 to-buy leaking into Stock, #4 placeholder-as-value, #5 pinned `pt_BR` locale, #13 string-based color lookup.
 
-**Fixed 2026-08-18 (Phase 1):** #6 hardcoded widths, #7 untyped state, #9 duplicated expiry logic, #12 pluralization, #14 dead code.
+**Fixed 2026-08-18 (Phase 1):** #6 hardcoded widths, #7 untyped state, #9 duplicated expiry logic, #12 pluralization, #14 dead code, #16 no test target.
 
 ## P1 — Layout and correctness
 
@@ -21,10 +21,7 @@ Numbers are stable IDs — when an issue is fixed its entry is deleted, and the 
 **11. Selected purchase-state button looks disabled.** `Item.swift` applies `.opacity(0.5)` to the *selected* state while also drawing a colored stroke on it. Dimming conventionally means unavailable; the two signals contradict.
 
 **15. No schema versioning.** `InShelfApp.swift:10` configures a bare `.modelContainer(for: [StockItem.self])`. The first non-additive change to `StockItem` will fail to open an existing store with no migration path.
-→ Deliberately deferred: there are no users, so there is no store worth migrating. Adopt `VersionedSchema` + `SchemaMigrationPlan` before the first build that reaches a device someone else owns.
-
-**16. No Xcode test target.** `ExpiryStatus` is covered by `Scripts/check-expiry-status.swift`, which compiles the real source and asserts against a fixed clock — but it runs by hand, not in Xcode and not in CI. Adding a target means editing `project.pbxproj`, which is safest done through Xcode (File → New → Target → Unit Testing Bundle).
-→ When the target exists, port the cases from the script and delete it.
+→ Deliberately deferred: there are no users, so there is no store worth migrating. Adopt `VersionedSchema` + `SchemaMigrationPlan` before the first build that reaches a device someone else owns. Not hypothetical — the test run already logs `CoreData: error: Recovery attempt ... was successful` when the simulator holds a store from an earlier build. It recovers today because nothing of value is in it.
 
 ## Verified non-issues
 

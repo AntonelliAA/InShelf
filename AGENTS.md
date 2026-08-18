@@ -16,18 +16,16 @@ InShelf is a single-target iOS app (SwiftUI + SwiftData) for tracking pantry ite
 # Build
 xcodebuild -scheme InShelf -destination 'generic/platform=iOS Simulator' build
 
+# Test (needs a booted-able simulator, not a generic destination)
+xcodebuild test -scheme InShelf -destination 'platform=iOS Simulator,name=iPhone 17'
+
 # Open in Xcode (preferred for UI work — SwiftUI previews are the fast loop)
 open InShelf.xcodeproj
 ```
 
-```bash
-# Check the expiry classification (compiles the real source, asserts, exits non-zero on failure)
-swiftc InShelf/Models/ExpiryStatus.swift Scripts/check-expiry-status.swift -o /tmp/check && /tmp/check
-```
+If `iPhone 17` does not exist locally, `xcodebuild -list` and `xcrun simctl list devices available` show what does. CI picks a simulator dynamically for this reason — see [.github/workflows/ci.yml](.github/workflows/ci.yml).
 
-`Scripts/` must stay outside `InShelf/` — that folder is file-system-synchronized, so any `.swift` inside it is compiled into the app.
-
-There is **no Xcode test target yet**, only the script above. Do not claim tests pass. If you add logic worth testing, create the target first (see [docs/roadmap.md](docs/roadmap.md), Phase 1).
+Tests live in `InShelfTests/` and use Swift Testing (`@Test` / `#expect`), not XCTest. Both `InShelf/` and `InShelfTests/` are file-system-synchronized folders: adding or deleting a `.swift` file there needs no `project.pbxproj` edit, and anything with a `.swift` extension inside them is compiled.
 
 ## Layout
 
@@ -64,7 +62,7 @@ Commits are one capitalized imperative sentence, no `feat:`/`fix:` prefix. Branc
 
 ## Before you claim done
 
-1. The change builds (`xcodebuild ... build`).
+1. The change builds and `xcodebuild test` passes. Run them — do not assume.
 2. Any new view was checked in **both** light and dark schemes.
 3. You did not introduce a new hardcoded color, width, or locale.
 4. Known issues you touched are updated in [docs/known-issues.md](docs/known-issues.md).

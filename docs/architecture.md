@@ -61,7 +61,7 @@ valid         further out
 none          no expiration date
 ```
 
-`ExpiryStatus.status(for:asOf:calendar:)` normalizes both sides to `startOfDay`, so an item expiring later today is not already expired. It takes the clock and calendar as parameters rather than reading `Date()` internally — that is what makes it assertable without mocking, and `Scripts/check-expiry-status.swift` compiles this exact file to check nine boundary cases.
+`ExpiryStatus.status(for:asOf:calendar:)` normalizes both sides to `startOfDay`, so an item expiring later today is not already expired. It takes the clock and calendar as parameters rather than reading `Date()` internally — that is what makes it assertable without mocking, and `InShelfTests/ExpiryStatusTests.swift` pins the boundaries against a fixed date.
 
 The file is deliberately Foundation-only. Color mapping lives in an `ExpiryStatus` extension inside `Components/ItemBar.swift`, next to the view that renders it, which keeps the classification free of SwiftUI and free of the asset catalog.
 
@@ -94,4 +94,4 @@ Everything visual is driven by the asset catalog. Never inline a color.
 
 ## What is deliberately absent
 
-No networking, no auth, no analytics, no CloudKit, no notifications, no localization catalog, no test target, no CI. Each of these is a roadmap decision, not an oversight — see [roadmap.md](roadmap.md).
+No networking, no auth, no analytics, no CloudKit, no notifications, no localization catalog. Each of these is a roadmap decision, not an oversight — see [roadmap.md](roadmap.md).

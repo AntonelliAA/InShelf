@@ -38,15 +38,15 @@ Still nothing new. This phase exists because every feature after it touches the 
 - ~~**Responsive layout** (#6)~~ — every hardcoded 361 / 176.5 / 171 replaced with `maxWidth: .infinity`; card images are resizable and scale to their container.
 - ~~Delete `TaskCategory` and unused `@State` vars (#14)~~
 - ~~Pluralize the expired banner (#12)~~ — done in passing
-- **Test coverage** — partial. `Scripts/check-expiry-status.swift` compiles the real `ExpiryStatus` and asserts nine boundary cases against a fixed clock. It is not an Xcode test target (#16) — that needs `project.pbxproj` surgery best done in Xcode.
+- ~~**Test target** (#16)~~ — `InShelfTests/` runs on Swift Testing, covering the expiry boundaries against a fixed clock and the state accessor's round-trip and fallback. The scheme is shared so `xcodebuild test` works from a clean clone, and CI runs it on every pull request.
 - **Schema versioning (#15)** — deliberately skipped. No users, no store worth migrating.
 
 **Why second:** this is the only phase with no user-visible output, which makes it the easiest to skip and the most expensive to skip. Doing it after Phase 2 would mean retrofitting a shopping list that already shipped on magic strings.
 
-Run the check with:
+Run the suite with:
 
 ```bash
-swiftc InShelf/Models/ExpiryStatus.swift Scripts/check-expiry-status.swift -o /tmp/check && /tmp/check
+xcodebuild test -scheme InShelf -destination 'platform=iOS Simulator,name=iPhone 17'
 ```
 
 ---
