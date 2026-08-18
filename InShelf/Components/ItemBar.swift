@@ -23,14 +23,13 @@ struct ItemBar: View {
                 case .normal(let name, let location, let quantity, let expiry),
                      .warning(let name, let location, let quantity, let expiry, _):
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(name).font(.headline).foregroundColor(.white)
-                        Text(location).font(.subheadline).foregroundColor(.gray)
+                        Text(name).font(.headline)
+                        Text(location).font(.subheadline).foregroundStyle(.labelSecondary)
                     }
                     Spacer()
                     VStack(alignment: .trailing, spacing: 2) {
                         Text("\(quantity)")
                             .font(.headline)
-                            .foregroundColor(.white)
                         Text(expiry)
                             .font(.subheadline)
                             .foregroundStyle(expiryColor ?? .redSecondary)
@@ -38,21 +37,21 @@ struct ItemBar: View {
                     }
                     
                 case .addOnly(let name):
-                    Text(name).font(.headline).foregroundColor(.white)
+                    Text(name).font(.headline)
                     Spacer()
-                    Image(systemName: "plus").foregroundColor(.greenPrimary)
-                    
+                    Image(systemName: "plus").foregroundStyle(.greenPrimary)
+
                 case .addRemove(let name, let quantity):
-                    Text(name).font(.headline).foregroundColor(.white)
+                    Text(name).font(.headline)
                     Spacer()
                     HStack {
-                        Image(systemName: "minus").foregroundColor(Color("RedSecondary"))
-                        Text("\(quantity)").foregroundColor(.white)
-                        Image(systemName: "plus").foregroundColor(.greenPrimary)
+                        Image(systemName: "minus").foregroundStyle(.redSecondary)
+                        Text("\(quantity)")
+                        Image(systemName: "plus").foregroundStyle(.greenPrimary)
                     }
-                    
+
                 case .simple(let name):
-                    Text(name).font(.headline).foregroundColor(.labelPrimary)
+                    Text(name).font(.headline)
                     Spacer()
                 }
             }

@@ -12,7 +12,7 @@ struct Stock: View {
     @Query(sort: \StockItem.createdAt, order: .reverse) private var allItems: [StockItem]
     
     private var inStockItems: [StockItem] {
-        allItems.filter { $0.quantity > 0 || $0.stateRaw == "inStock" }
+        allItems.filter { $0.stateRaw == "inStock" }
     }
 
     private var nowStart: Date { Calendar.current.startOfDay(for: Date()) }

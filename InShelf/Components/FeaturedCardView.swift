@@ -9,8 +9,9 @@ struct FeaturedCardView: View {
                     .font(.headline)
                 Text("Add new recipes to your recipe book")
                     .font(.caption)
+                    .foregroundStyle(.labelSecondary)
             }
-            .foregroundStyle(.white)
+            .foregroundStyle(.labelPrimary)
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(.backgroundSecondary)
