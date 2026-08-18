@@ -10,46 +10,49 @@ import SwiftData
 
 struct Stock: View {
     @Query(sort: \StockItem.createdAt, order: .reverse) private var allItems: [StockItem]
-    
-    private var inStockItems: [StockItem] {
+
+    @State private var searchText = ""
+    @State private var filter: StockFilter = .all
+    @State private var isAddingItem = false
+
+    /// Everything owned, before search or filter — what decides "is this screen empty".
+    private var stockedItems: [StockItem] {
         allItems.filter { $0.state == .inStock }
     }
 
-    private var expiredItems: [StockItem] {
-        inStockItems.filter { $0.expiryStatus() == .expired }
+    private var searchedItems: [StockItem] {
+        stockedItems.matching(query: searchText)
     }
 
-    /// Everything still edible, soonest expiration first, undated items last.
-    private var validItems: [StockItem] {
-        inStockItems
-            .filter { $0.expiryStatus() != .expired }
-            .sorted { a, b in
-                switch (a.expirationDate, b.expirationDate) {
-                case let (da?, db?):
-                    return da < db
-                case (nil, _?):
-                    return false
-                case (_?, nil):
-                    return true
-                default:
-                    return a.createdAt > b.createdAt
-                }
-            }
+    private var expiredItems: [StockItem] {
+        searchedItems.matching(filter: .expired)
+    }
+
+    /// Under `.all` the expired items are represented by the summary banner rather
+    /// than individual rows, so they are excluded here to avoid showing both.
+    private var visibleItems: [StockItem] {
+        switch filter {
+        case .all:
+            return searchedItems.filter { $0.expiryStatus() != .expired }.sortedByExpiry()
+        case .expiringSoon, .expired:
+            return searchedItems.matching(filter: filter).sortedByExpiry()
+        }
+    }
+
+    private var showsExpiredBanner: Bool {
+        filter == .all && !expiredItems.isEmpty
     }
 
     var body: some View {
         ZStack {
-            
             Color(.backgroundPrimary).ignoresSafeArea()
-            
-            if inStockItems.isEmpty {
-                VStack {
-                    EmptyStateView(type: .stock) { }
-                        .padding(.horizontal)
-                }
+
+            if stockedItems.isEmpty {
+                EmptyStateView(type: .stock) { isAddingItem = true }
+                    .padding(.horizontal)
             } else {
                 List {
-                    if !expiredItems.isEmpty {
+                    if showsExpiredBanner {
                         ItemBar(
                             icon: .warningIconFallback,
                             type: .warning(
@@ -61,11 +64,13 @@ struct Stock: View {
                             ),
                             expiry: .expired
                         )
+                        .contentShape(Rectangle())
+                        .onTapGesture { filter = .expired }
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color(.backgroundPrimary))
                     }
-                    
-                    ForEach(validItems) { item in
+
+                    ForEach(visibleItems) { item in
                         ItemBar(
                             icon: ItemIcon(rawValue: item.iconRaw) ?? .avocado,
                             type: .normal(
@@ -81,26 +86,43 @@ struct Stock: View {
                     }
                 }
                 .listStyle(.plain)
+                .searchable(text: $searchText, prompt: "Search your stock")
+                .overlay {
+                    if visibleItems.isEmpty && !showsExpiredBanner {
+                        emptyResults
+                    }
+                }
             }
         }
         .navigationTitle("My Stock")
-        
-        
+        .navigationDestination(isPresented: $isAddingItem) { Item() }
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    
-                } label: {
-                    Image(systemName: "magnifyingglass")
-                }
-            }
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    
+                Menu {
+                    Picker("Filter", selection: $filter) {
+                        ForEach(StockFilter.allCases) { option in
+                            Label(option.title, systemImage: option.systemImage).tag(option)
+                        }
+                    }
                 } label: {
-                    Image(systemName: "line.3.horizontal.decrease")
+                    Image(systemName: filter == .all
+                          ? "line.3.horizontal.decrease"
+                          : "line.3.horizontal.decrease.circle.fill")
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private var emptyResults: some View {
+        if searchText.isEmpty {
+            ContentUnavailableView(
+                "Nothing \(filter.title.lowercased())",
+                systemImage: filter.systemImage,
+                description: Text("No items match this filter.")
+            )
+        } else {
+            ContentUnavailableView.search(text: searchText)
         }
     }
 }

@@ -13,7 +13,7 @@ struct TabBar: View {
             
             Tab("List", systemImage: "basket") {
                 NavigationStack {
-                    ComingSoon()
+                    ShoppingList()
                 }
             }
             
