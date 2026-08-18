@@ -1,0 +1,97 @@
+# Architecture
+
+How InShelf is put together. Read this before changing data flow, adding a screen, or touching persistence.
+
+## Shape of the app
+
+Single target, no modules, no dependencies. SwiftUI views read and write SwiftData directly — there is no ViewModel, repository, or service layer, and at ~1100 lines none is warranted.
+
+```
+InShelfApp (@main)
+  └─ .modelContainer(for: [StockItem.self])   ← the only persistence setup
+       └─ TabBar (TabView, 5 tabs)
+            ├─ Recipes  → ComingSoon
+            ├─ List     → ComingSoon
+            ├─ Create   → Create ─┬─ FeaturedCardView
+            │                     └─ MenuCardView → MyItems ─┬─ ItemBar (rows)
+            │                                                └─ Item (create / edit form)
+            ├─ Stock    → Stock ──── ItemBar (rows)
+            └─ Profile  → ComingSoon
+```
+
+Three of five tabs are placeholders. `Create` is the only path that reaches the editor, and `Item` is the only writer in the app.
+
+## Data flow
+
+Reads are declarative, writes are imperative:
+
+- **Read** — `@Query(sort: \StockItem.createdAt, order: .reverse)` in `Stock` and `MyItems`. Filtering and sorting happen in Swift computed properties on the view, not in the query predicate.
+- **Write** — `Item.swift` holds `@State` copies of every field, hydrates them from the passed-in `StockItem` in `.onAppear` (guarded by `didLoadFromItem`), and on save either mutates the existing model object or inserts a new one via `modelContext.insert`. SwiftData autosaves; there is no explicit `save()`.
+- **Delete** — `.onDelete` in `MyItems` maps `IndexSet` to objects before calling `modelContext.delete`, which is the index-safe order.
+
+The `Item` screen intentionally edits a *copy* in `@State` so an abandoned edit does not dirty the model. The trade-off is the hydration guard: `didLoadFromItem` exists because `.onAppear` can fire more than once and would otherwise stomp in-progress edits.
+
+## Model
+
+`StockItem` is the only persisted type.
+
+| Field | Type | Notes |
+|---|---|---|
+| `name` | `String` | Trimmed on save |
+| `iconRaw` | `String` | Raw value of `ItemIcon`; falls back to `.avocado` when unmapped |
+| `quantity` | `Int` | Floor-clamped at 0 in the editor |
+| `unitRaw` | `String` | Raw value of `UnitType` (`units` / `kg` / `g`) |
+| `notes` | `String` | Labelled "Description" in the UI |
+| `expirationDate` | `Date?` | `nil` when the editor's expiration toggle is off |
+| `alwaysInList` | `Bool` | Reserved for the shopping list; nothing reads it yet |
+| `recipesCount` | `Int` | Reserved for recipes; display-only, never incremented |
+| `stateRaw` | `String` | Backing column for `ItemPurchaseState`; read it through `StockItem.state`, never directly |
+| `createdAt` / `updatedAt` | `Date` | `updatedAt` is only touched on edit, not on insert |
+
+No schema versioning or `VersionedSchema` is configured. Any change to `StockItem` that is not purely additive will fail to open existing stores on device.
+
+## Derived state
+
+Expiry classification is the app's core logic and lives in exactly one place: `Models/ExpiryStatus.swift`.
+
+```
+expired       target < today
+expiringSoon  0 ≤ (target − today) ≤ 3 days
+valid         further out
+none          no expiration date
+```
+
+`ExpiryStatus.status(for:asOf:calendar:)` normalizes both sides to `startOfDay`, so an item expiring later today is not already expired. It takes the clock and calendar as parameters rather than reading `Date()` internally — that is what makes it assertable without mocking, and `InShelfTests/ExpiryStatusTests.swift` pins the boundaries against a fixed date.
+
+The file is deliberately Foundation-only. Color mapping lives in an `ExpiryStatus` extension inside `Components/ItemBar.swift`, next to the view that renders it, which keeps the classification free of SwiftUI and free of the asset catalog.
+
+`StockItem.expiryStatus(asOf:)` and `StockItem.state` live in `Models/StockItem+Derived.swift`. Computed properties on a `@Model` type go in an extension so the macro does not try to persist them. `state` reads and writes the stored `stateRaw` column through `ItemPurchaseState`, so the string literals exist in one file instead of five — without changing the schema.
+
+`Stock` partitions on top of this: expired items collapse into a single `.warning` summary row, the rest sort ascending by expiration date with undated items last. `MyItems` does no partitioning and shows everything.
+
+## Design system
+
+Everything visual is driven by the asset catalog. Never inline a color.
+
+**Semantic tokens** — `BackgroundPrimary` (screen), `BackgroundSecondary` (cards, rows), `BackgroundTertiary`; `LabelPrimary`, `LabelSecondary`, `LabelTertiary`.
+
+**Accent tokens** — `RedPrimary` (tab tint), `RedSecondary` (destructive, expired, interactive glyphs), `GreenPrimary` (valid, additive actions), `OrangePrimary` (expiring soon).
+
+**Shape** — 16pt corner radius throughout. Rows that carry a warning banner use `UnevenRoundedRectangle` with square bottom corners so the banner reads as one unit.
+
+**Icons** — 50 SVG imagesets under `Assets.xcassets/Icons/`, enumerated by `ItemIcon`. Raw values match filenames exactly, including spaces (`"hot dog"`, `"sushi rool"` — the typo is in the asset name and must be preserved).
+
+## Components
+
+| Component | Purpose | Notes |
+|---|---|---|
+| `ItemBar` | The one row type, driven by `ItemBarType` | 5 cases; only `.normal` and `.warning` are used in production |
+| `EmptyStateView` | Illustration + copy for empty lists | Takes an `action` closure that is never called and renders no button |
+| `MenuCardView` | Navigation card on the Create hub | |
+| `FeaturedCardView` | Static promo banner | Hardcoded copy, no destination |
+
+`ItemBarType` is a closed enum carrying display data as associated values rather than taking a `StockItem`. That keeps the component previewable without a model container, which is why previews work without an in-memory store.
+
+## What is deliberately absent
+
+No networking, no auth, no analytics, no CloudKit, no notifications, no localization catalog. Each of these is a roadmap decision, not an oversight — see [roadmap.md](roadmap.md).

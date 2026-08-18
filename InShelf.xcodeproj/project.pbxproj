@@ -6,7 +6,18 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		9200DC7E3034F03900C744A3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9291798D2E4661D100F46066 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 929179942E4661D100F46066;
+			remoteInfo = InShelf;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		9200DC7A3034F03900C744A3 /* InShelfTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = InShelfTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		929179952E4661D100F46066 /* InShelf.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InShelf.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -21,6 +32,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		9200DC7B3034F03900C744A3 /* InShelfTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = InShelfTests;
+			sourceTree = "<group>";
+		};
 		929179972E4661D100F46066 /* InShelf */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -32,6 +48,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		9200DC773034F03900C744A3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		929179922E4661D100F46066 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -46,6 +69,7 @@
 			isa = PBXGroup;
 			children = (
 				929179972E4661D100F46066 /* InShelf */,
+				9200DC7B3034F03900C744A3 /* InShelfTests */,
 				929179962E4661D100F46066 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,6 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				929179952E4661D100F46066 /* InShelf.app */,
+				9200DC7A3034F03900C744A3 /* InShelfTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -61,6 +86,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		9200DC793034F03900C744A3 /* InShelfTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9200DC823034F03900C744A3 /* Build configuration list for PBXNativeTarget "InShelfTests" */;
+			buildPhases = (
+				9200DC763034F03900C744A3 /* Sources */,
+				9200DC773034F03900C744A3 /* Frameworks */,
+				9200DC783034F03900C744A3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9200DC7F3034F03900C744A3 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				9200DC7B3034F03900C744A3 /* InShelfTests */,
+			);
+			name = InShelfTests;
+			packageProductDependencies = (
+			);
+			productName = InShelfTests;
+			productReference = 9200DC7A3034F03900C744A3 /* InShelfTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		929179942E4661D100F46066 /* InShelf */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 929179A02E4661D300F46066 /* Build configuration list for PBXNativeTarget "InShelf" */;
@@ -90,9 +138,13 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1640;
+				LastSwiftUpdateCheck = 2640;
 				LastUpgradeCheck = 1640;
 				TargetAttributes = {
+					9200DC793034F03900C744A3 = {
+						CreatedOnToolsVersion = 26.4;
+						TestTargetID = 929179942E4661D100F46066;
+					};
 					929179942E4661D100F46066 = {
 						CreatedOnToolsVersion = 16.4;
 					};
@@ -113,11 +165,19 @@
 			projectRoot = "";
 			targets = (
 				929179942E4661D100F46066 /* InShelf */,
+				9200DC793034F03900C744A3 /* InShelfTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		9200DC783034F03900C744A3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		929179932E4661D100F46066 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -128,6 +188,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		9200DC763034F03900C744A3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		929179912E4661D100F46066 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -137,7 +204,59 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		9200DC7F3034F03900C744A3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 929179942E4661D100F46066 /* InShelf */;
+			targetProxy = 9200DC7E3034F03900C744A3 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		9200DC803034F03900C744A3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3MJ7SRC9Q2;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = br.academy.InShelfTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/InShelf.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/InShelf";
+			};
+			name = Debug;
+		};
+		9200DC813034F03900C744A3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3MJ7SRC9Q2;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = br.academy.InShelfTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/InShelf.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/InShelf";
+			};
+			name = Release;
+		};
 		9291799E2E4661D300F46066 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -328,6 +447,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		9200DC823034F03900C744A3 /* Build configuration list for PBXNativeTarget "InShelfTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9200DC803034F03900C744A3 /* Debug */,
+				9200DC813034F03900C744A3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		929179902E4661D100F46066 /* Build configuration list for PBXProject "InShelf" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

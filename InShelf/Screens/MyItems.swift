@@ -6,17 +6,6 @@ struct MyItems: View {
     @Environment(\.modelContext) private var modelContext
     @State private var selectedItem: StockItem? = nil
     
-    private func expiryColor(for date: Date?) -> Color {
-        guard let date else { return .greenPrimary }
-        let now = Calendar.current.startOfDay(for: Date())
-        let target = Calendar.current.startOfDay(for: date)
-        if target < now { return .redSecondary }
-        if let days = Calendar.current.dateComponents([.day], from: now, to: target).day, days <= 3 {
-            return Color(.orangePrimary)
-        }
-        return .greenPrimary
-    }
-    
     var body: some View {
         ZStack {
             
@@ -34,11 +23,11 @@ struct MyItems: View {
                             icon: ItemIcon(rawValue: item.iconRaw) ?? .avocado,
                             type: .normal(
                                 name: item.name,
-                                location: item.stateRaw == "inStock" ? "In Stock" : "To buy",
+                                location: item.state.title,
                                 quantity: item.quantity,
                                 expiry: item.expirationDate.map { $0.formatted(date: .abbreviated, time: .omitted) } ?? "—"
                             ),
-                            expiryColor: expiryColor(for: item.expirationDate)
+                            expiry: item.expiryStatus()
                         )
                         .contentShape(Rectangle())
                         .onTapGesture { selectedItem = item }

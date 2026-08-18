@@ -37,6 +37,8 @@ Cartfile.resolved
 
 # IDE
 .vscode/
+.claude/*
+!.claude/agents/
 *.swiftformat
 
 # Build artifacts

@@ -12,47 +12,31 @@ struct Stock: View {
     @Query(sort: \StockItem.createdAt, order: .reverse) private var allItems: [StockItem]
     
     private var inStockItems: [StockItem] {
-        allItems.filter { $0.quantity > 0 || $0.stateRaw == "inStock" }
+        allItems.filter { $0.state == .inStock }
     }
 
-    private var nowStart: Date { Calendar.current.startOfDay(for: Date()) }
-    
     private var expiredItems: [StockItem] {
-        inStockItems.filter { item in
-            if let d = item.expirationDate { return Calendar.current.startOfDay(for: d) < nowStart }
-            return false
-        }
+        inStockItems.filter { $0.expiryStatus() == .expired }
     }
-    
+
+    /// Everything still edible, soonest expiration first, undated items last.
     private var validItems: [StockItem] {
-        inStockItems.filter { item in
-            guard let d = item.expirationDate else { return true }
-            return Calendar.current.startOfDay(for: d) >= nowStart
-        }
-        .sorted { a, b in
-            switch (a.expirationDate, b.expirationDate) {
-            case let (da?, db?):
-                return da < db
-            case (nil, _?):
-                return false
-            case (_?, nil):
-                return true
-            default:
-                return a.createdAt > b.createdAt
+        inStockItems
+            .filter { $0.expiryStatus() != .expired }
+            .sorted { a, b in
+                switch (a.expirationDate, b.expirationDate) {
+                case let (da?, db?):
+                    return da < db
+                case (nil, _?):
+                    return false
+                case (_?, nil):
+                    return true
+                default:
+                    return a.createdAt > b.createdAt
+                }
             }
-        }
     }
-    
-    private func expiryColor(for date: Date?) -> Color {
-        guard let date else { return .greenPrimary }
-        let target = Calendar.current.startOfDay(for: date)
-        if target < nowStart { return .redSecondary }
-        if let days = Calendar.current.dateComponents([.day], from: nowStart, to: target).day, days <= 3 {
-            return Color(.orangePrimary)
-        }
-        return .greenPrimary
-    }
-    
+
     var body: some View {
         ZStack {
             
@@ -75,7 +59,7 @@ struct Stock: View {
                                 expiry: "Expired",
                                 expiredCount: expiredItems.count
                             ),
-                            expiryColor: .redSecondary
+                            expiry: .expired
                         )
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color(.backgroundPrimary))
@@ -86,11 +70,11 @@ struct Stock: View {
                             icon: ItemIcon(rawValue: item.iconRaw) ?? .avocado,
                             type: .normal(
                                 name: item.name,
-                                location: "In Stock",
+                                location: item.state.title,
                                 quantity: item.quantity,
                                 expiry: item.expirationDate.map { $0.formatted(date: .abbreviated, time: .omitted) } ?? "—"
                             ),
-                            expiryColor: expiryColor(for: item.expirationDate)
+                            expiry: item.expiryStatus()
                         )
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color(.backgroundPrimary))

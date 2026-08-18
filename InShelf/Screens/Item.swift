@@ -7,11 +7,6 @@
 
 import SwiftUI
 
-enum ItemPurchaseState {
-    case toBuy
-    case inStock
-}
-
 enum UnitType: String, CaseIterable {
     case units
     case kg
@@ -30,14 +25,13 @@ struct Item: View {
     var item: StockItem? = nil
 
     @State private var expirationDate = Date()
-    @State private var showDatePicker = false
+    @State private var hasExpiration = false
     @State private var alwaysInList = false
     @State private var recipesCount = 0
     @State private var quantity = 0
     @State private var description = ""
-    @State private var misc = ""
     @State private var purchaseState: ItemPurchaseState = .toBuy
-    @State private var title: String = "Item name"
+    @State private var title: String = ""
     @State private var selectedIcon: ItemIcon = .avocado
     @FocusState private var isTitleFocused: Bool
     @State private var showIconPicker: Bool = false
@@ -47,10 +41,11 @@ struct Item: View {
     @State private var didLoadFromItem = false
     @State private var showValidationAlert = false
 
-    private var isNameValid: Bool {
-        let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
-        return !trimmed.isEmpty && trimmed.lowercased() != "item name"
+    private var trimmedTitle: String {
+        title.trimmingCharacters(in: .whitespacesAndNewlines)
     }
+
+    private var isNameValid: Bool { !trimmedTitle.isEmpty }
     
     var body: some View {
         ZStack {
@@ -92,7 +87,7 @@ struct Item: View {
                                 Text("To buy")
                             }
                             .font(.title2)
-                            .frame(minWidth: 171,minHeight: 80)
+                            .frame(maxWidth: .infinity, minHeight: 80)
                             .background(.backgroundSecondary)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                             .overlay(
@@ -114,7 +109,7 @@ struct Item: View {
                                 Text("In Stock")
                             }
                             .font(.title2)
-                            .frame(minWidth: 171,minHeight: 80)
+                            .frame(maxWidth: .infinity, minHeight: 80)
                             .background(.backgroundSecondary)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                             .overlay(
@@ -171,7 +166,7 @@ struct Item: View {
                             }
                         }
                         .padding(.horizontal, 12.0)
-                        .frame(minWidth: 361,minHeight: 52)
+                        .frame(maxWidth: .infinity, minHeight: 52)
                         .background(
                             RoundedRectangle(cornerRadius:16)
                                 .foregroundStyle(.backgroundSecondary)
@@ -190,7 +185,7 @@ struct Item: View {
                                 .disableAutocorrection(false)
                         }
                         .padding(.horizontal, 12.0)
-                        .frame(minWidth: 361,minHeight: 52,alignment: .leading)
+                        .frame(maxWidth: .infinity, minHeight: 52, alignment: .leading)
                         .background(
                             RoundedRectangle(cornerRadius:16)
                                 .foregroundStyle(.backgroundSecondary)
@@ -208,18 +203,22 @@ struct Item: View {
                                 Text("Expiration")
                             }
                             Spacer()
-                            DatePicker(
-                                "",
-                                selection: $expirationDate,
-                                displayedComponents: .date
-                            )
-                            .labelsHidden()
-                            .datePickerStyle(.compact)
-                            .tint(Color(.redSecondary))
-                            .environment(\.locale, .init(identifier: "pt_BR"))
+                            if hasExpiration {
+                                DatePicker(
+                                    "",
+                                    selection: $expirationDate,
+                                    displayedComponents: .date
+                                )
+                                .labelsHidden()
+                                .datePickerStyle(.compact)
+                                .tint(Color(.redSecondary))
+                            }
+                            Toggle("", isOn: $hasExpiration)
+                                .labelsHidden()
+                                .tint(Color(.redSecondary))
                         }
                         .padding(.horizontal, 12.0)
-                        .frame(minWidth: 361,minHeight: 52)
+                        .frame(maxWidth: .infinity, minHeight: 52)
                         .background(
                             RoundedRectangle(cornerRadius:16)
                                 .foregroundStyle(.backgroundSecondary)
@@ -236,7 +235,7 @@ struct Item: View {
                                 .tint(Color(.redSecondary))
                         }
                         .padding(.horizontal, 12.0)
-                        .frame(minWidth: 361,minHeight: 52)
+                        .frame(maxWidth: .infinity, minHeight: 52)
                         .background(
                             RoundedRectangle(cornerRadius:16)
                                 .foregroundStyle(.backgroundSecondary)
@@ -252,7 +251,7 @@ struct Item: View {
                                 .foregroundStyle(.labelSecondary)
                         }
                         .padding(.horizontal, 12.0)
-                        .frame(minWidth: 361,minHeight: 52)
+                        .frame(maxWidth: .infinity, minHeight: 52)
                         .background(
                             RoundedRectangle(cornerRadius:16)
                                 .foregroundStyle(.backgroundSecondary)
@@ -271,10 +270,11 @@ struct Item: View {
             quantity = existing.quantity
             unit = UnitType(rawValue: existing.unitRaw) ?? .units
             description = existing.notes
+            hasExpiration = existing.expirationDate != nil
             expirationDate = existing.expirationDate ?? Date()
             alwaysInList = existing.alwaysInList
             recipesCount = existing.recipesCount
-            purchaseState = existing.stateRaw == "inStock" ? .inStock : .toBuy
+            purchaseState = existing.state
         }
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
@@ -284,8 +284,8 @@ struct Item: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     isTitleFocused = false
-                    let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
-                    guard !trimmed.isEmpty && trimmed.lowercased() != "item name" else {
+                    let trimmed = trimmedTitle
+                    guard isNameValid else {
                         showValidationAlert = true
                         return
                     }
@@ -295,24 +295,23 @@ struct Item: View {
                         existing.quantity = quantity
                         existing.unitRaw = unit.rawValue
                         existing.notes = description
-                        existing.expirationDate = expirationDate
+                        existing.expirationDate = hasExpiration ? expirationDate : nil
                         existing.alwaysInList = alwaysInList
                         existing.recipesCount = recipesCount
-                        existing.stateRaw = (purchaseState == .toBuy) ? "toBuy" : "inStock"
+                        existing.state = purchaseState
                         existing.updatedAt = Date()
                         dismiss()
                     } else {
-                        let stateRaw = (purchaseState == .toBuy) ? "toBuy" : "inStock"
                         let newItem = StockItem(
                             name: trimmed,
                             iconRaw: selectedIcon.rawValue,
                             quantity: quantity,
                             unitRaw: unit.rawValue,
                             notes: description,
-                            expirationDate: expirationDate,
+                            expirationDate: hasExpiration ? expirationDate : nil,
                             alwaysInList: alwaysInList,
                             recipesCount: recipesCount,
-                            stateRaw: stateRaw
+                            stateRaw: purchaseState.rawValue
                         )
                         modelContext.insert(newItem)
                         dismiss()
